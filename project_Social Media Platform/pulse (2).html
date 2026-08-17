@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pulse — a tiny social feed</title>
+
+<!-- ============================================================
+     FONTS — Space Grotesk (display) + Inter (body)
+     ============================================================ -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="stylesheet.css">
+</head>
+<body>
+
+<!-- ================================================================
+     SCREEN: AUTH (login / signup combined)
+     ================================================================ -->
+<section id="screen-auth">
+  <div class="auth-card">
+    <div class="auth-brand"><div class="dot"></div><span>Pulse</span></div>
+    <h1 id="auth-title">Welcome back</h1>
+    <p class="sub" id="auth-sub">Enter a username to jump into the feed. New here? Just pick a username and we'll set up your account.</p>
+    <p class="auth-error hidden" id="auth-error"></p>
+    <form id="auth-form">
+      <div class="field">
+        <label for="auth-username">Username</label>
+        <input id="auth-username" type="text" placeholder="e.g. jordan_codes" autocomplete="username" required>
+      </div>
+      <div class="field" id="auth-display-field">
+        <label for="auth-display">Display name <span style="font-weight:400; text-transform:none; color:var(--faint);">(optional)</span></label>
+        <input id="auth-display" type="text" placeholder="e.g. Jordan Lee" maxlength="40">
+      </div>
+      <div class="field" id="auth-bio-field">
+        <label for="auth-bio">Bio <span style="font-weight:400; text-transform:none; color:var(--faint);">(optional)</span></label>
+        <input id="auth-bio" type="text" placeholder="Say something about yourself" maxlength="120">
+      </div>
+      <button type="submit" class="btn btn-primary" id="auth-submit">Continue</button>
+      <p class="field-hint">New usernames create an account automatically. Existing usernames just log you back in.</p>
+    </form>
+  </div>
+</section>
+
+<!-- ================================================================
+     SCREEN: APP
+     ================================================================ -->
+<section id="screen-app" class="hidden">
+  <nav class="sidebar">
+    <div class="wordmark"><div class="dot"></div>Pulse</div>
+
+    <button class="nav-item" data-nav="feed"><span class="ic">🏠</span> Feed</button>
+    <button class="nav-item" data-nav="search"><span class="ic">🔍</span> Search</button>
+    <button class="nav-item" data-nav="messages"><span class="ic">✉️</span> Messages</button>
+    <button class="nav-item" data-nav="bookmarks"><span class="ic">🔖</span> Bookmarks</button>
+    <button class="nav-item" data-nav="profile"><span class="ic">👤</span> My Profile</button>
+    <button class="nav-item" data-nav="people"><span class="ic">🧭</span> People</button>
+    <button class="nav-item" data-nav="settings"><span class="ic">⚙️</span> Settings</button>
+
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <div class="avatar sz-32" id="sidebar-avatar"></div>
+        <div class="who">
+          <strong id="sidebar-username"></strong>
+          <span id="sidebar-handle"></span>
+        </div>
+      </div>
+      <button class="nav-item" id="logout-btn"><span class="ic">🚪</span> Log out</button>
+    </div>
+  </nav>
+
+  <main class="main-col">
+
+    <!-- ---------- VIEW: FEED ---------- -->
+    <div id="view-feed">
+      <div class="topbar">
+        <div>
+          <h2>Home feed</h2>
+          <p>What's happening right now?</p>
+        </div>
+        <div class="topbar-actions">
+          <div class="sort-tabs">
+            <button class="sort-tab active" data-sort="latest">Latest</button>
+            <button class="sort-tab" data-sort="top">Top</button>
+          </div>
+          <div class="notif-wrap" id="notif-wrap">
+            <button class="btn-icon" id="notif-bell" title="Notifications">🔔</button>
+            <div class="notif-panel hidden" id="notif-panel"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="composer">
+        <div class="composer-row">
+          <div class="avatar sz-40" id="composer-avatar"></div>
+          <textarea id="composer-input" placeholder="Share something... use #hashtags if you like" maxlength="280"></textarea>
+        </div>
+        <div class="composer-footer">
+          <span class="char-count"><span id="composer-count">0</span>/280</span>
+          <button type="button" class="btn btn-ghost btn-sm" id="composer-image-toggle">🖼️ Image</button>
+          <button class="btn btn-accent btn-sm" id="composer-post">Post</button>
+        </div>
+        <div class="composer-image-row hidden" id="composer-image-row">
+          <input type="url" id="composer-image-input" placeholder="Paste an image URL (https://...)">
+        </div>
+        <div class="composer-hint">Tip: words starting with # become clickable tags.</div>
+      </div>
+
+      <div id="feed-list"></div>
+    </div>
+
+    <!-- ---------- VIEW: SEARCH ---------- -->
+    <div id="view-search" class="hidden">
+      <div class="topbar"><div><h2>Search</h2><p>Find people or posts — try a #hashtag too.</p></div></div>
+      <div class="search-box">
+        <span>🔍</span>
+        <input type="text" id="search-input" placeholder="Search users, posts, or #tags...">
+      </div>
+      <div id="search-results"></div>
+    </div>
+
+    <!-- ---------- VIEW: MESSAGES ---------- -->
+    <div id="view-messages" class="hidden">
+      <div class="topbar"><div><h2>Messages</h2><p>Private conversations with people you follow.</p></div></div>
+      <div id="messages-body"></div>
+    </div>
+
+    <!-- ---------- VIEW: BOOKMARKS ---------- -->
+    <div id="view-bookmarks" class="hidden">
+      <div class="topbar"><div><h2>Bookmarks</h2><p>Posts you've saved for later.</p></div></div>
+      <div id="bookmarks-list"></div>
+    </div>
+
+    <!-- ---------- VIEW: PROFILE (own or someone else's) ---------- -->
+    <div id="view-profile" class="hidden">
+      <div class="topbar">
+        <div><h2 id="profile-topbar-title">Profile</h2></div>
+      </div>
+      <div id="profile-content"></div>
+    </div>
+
+    <!-- ---------- VIEW: PEOPLE ---------- -->
+    <div id="view-people" class="hidden">
+      <div class="topbar"><div><h2>People</h2><p>Discover and follow other users on Pulse.</p></div></div>
+      <div id="people-list"></div>
+    </div>
+
+    <!-- ---------- VIEW: SETTINGS ---------- -->
+    <div id="view-settings" class="hidden">
+      <div class="topbar"><div><h2>Settings</h2><p>Customize how Pulse looks and how you appear to others.</p></div></div>
+      <div id="settings-content"></div>
+    </div>
+
+  </main>
+</section>
+<script src="logic.js"></script>
+</body>
+</html>
